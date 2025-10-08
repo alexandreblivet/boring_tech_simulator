@@ -17,7 +17,7 @@ Based on [Dan McKinley's 2015 essay](https://mcfunley.com/choose-boring-technolo
 This is a project *about* choosing boring technology, so it's built with:
 - Plain HTML, CSS, vanilla JavaScript
 - Zero dependencies, no build process, no npm
-- Single file: `boring_tech_app.html`
+- Single file: `index.html`
 - Deploy by uploading to GitHub Pages
 
 **It will run unchanged for 10 years.**
@@ -40,7 +40,7 @@ This is a project *about* choosing boring technology, so it's built with:
 ```bash
 # Clone and open
 git clone https://github.com/alexandreblivet/boring-tech-simulator.git
-open boring_tech_app.html
+open index.html
 
 # That's it. No install needed.
 ```
