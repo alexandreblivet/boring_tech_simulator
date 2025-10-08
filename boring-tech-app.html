@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Boring Technology - Decision Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #e0e0e0;
+            color: #000;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border: 5px solid #000;
+            padding: 0;
+        }
+        
+        header {
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            border-bottom: 5px solid #000;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .token-counter {
+            background: #ffff00;
+            border: 3px solid #000;
+            padding: 15px;
+            margin: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .burden-meter {
+            background: #ff6b6b;
+            border: 3px solid #000;
+            padding: 15px;
+            margin: 20px;
+            margin-top: 0;
+        }
+        
+        .burden-bar {
+            background: #fff;
+            border: 2px solid #000;
+            height: 30px;
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        .burden-fill {
+            background: #ff0000;
+            height: 100%;
+            transition: width 0.5s;
+            border-right: 2px solid #000;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .scenario {
+            border: 3px solid #000;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f5f5f5;
+        }
+        
+        .scenario h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+        
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .choice-btn {
+            background: #fff;
+            border: 3px solid #000;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.1s;
+        }
+        
+        .choice-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+        
+        .choice-btn:active {
+            transform: translate(2px, 2px);
+        }
+        
+        .consequence {
+            background: #fff0c2;
+            border: 3px solid #000;
+            padding: 15px;
+            margin: 20px;
+            display: none;
+        }
+        
+        .consequence.show {
+            display: block;
+        }
+        
+        .consequence-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .hall-of-shame {
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 20px;
+            border: 3px solid #000;
+        }
+        
+        .example {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #fff;
+            padding-left: 15px;
+        }
+        
+        .game-over {
+            background: #ff0000;
+            color: #fff;
+            padding: 30px;
+            text-align: center;
+            border: 5px solid #000;
+            margin: 20px;
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .game-over.show {
+            display: block;
+        }
+        
+        .victory {
+            background: #00ff00;
+            color: #000;
+            padding: 30px;
+            text-align: center;
+            border: 5px solid #000;
+            margin: 20px;
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .victory.show {
+            display: block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .reset-btn {
+            background: #000;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 15px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        .reset-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+        
+        footer {
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CHOOSE BORING TECHNOLOGY</h1>
+            <div class="subtitle">An Interactive Decision Simulator</div>
+            <div class="subtitle">Based on Dan McKinley's Essay</div>
+        </header>
+        
+        <div class="token-counter">
+            INNOVATION TOKENS REMAINING: <span id="token-count">3</span> / 3
+        </div>
+        
+        <div class="burden-meter">
+            <div>OPERATIONAL BURDEN</div>
+            <div class="burden-bar">
+                <div class="burden-fill" id="burden-fill" style="width: 0%"></div>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px;">
+                <span id="burden-percentage">0</span>% - <span id="burden-status">MANAGEABLE</span>
+            </div>
+        </div>
+        
+        <div class="consequence" id="consequence">
+            <div class="consequence-title">CONSEQUENCE:</div>
+            <div id="consequence-text"></div>
+        </div>
+        
+        <div class="game-over" id="game-over">
+            ☠️ STARTUP FAILED ☠️<br>
+            <div style="font-size: 16px; margin-top: 20px;" id="failure-reason"></div>
+        </div>
+        
+        <div class="victory" id="victory">
+            ✓ SUCCESS! YOUR STARTUP SHIPPED PRODUCT ✓<br>
+            <div style="font-size: 16px; margin-top: 20px;" id="victory-message"></div>
+        </div>
+        
+        <div class="content" id="scenarios">
+            <div class="scenario" id="scenario-1">
+                <h2>SCENARIO 1: Database Selection</h2>
+                <p>Your startup needs to store user data, transactions, and product information. The CTO is asking what database to use.</p>
+                <div class="choices">
+                    <button class="choice-btn" onclick="makeChoice(1, 'postgres', 0, 10)">
+                        <strong>[A] PostgreSQL</strong><br>
+                        Boring choice. Battle-tested since 1996. Free. Everyone on the team knows SQL.
+                        <br><strong>Cost: 0 tokens | Burden: +10%</strong>
+                    </button>
+                    <button class="choice-btn" onclick="makeChoice(1, 'mongo', 1, 25)">
+                        <strong>[B] MongoDB</strong><br>
+                        The webinar said it's "web-scale"! JSON documents feel modern. None of you have used it before.
+                        <br><strong>Cost: 1 token | Burden: +25%</strong>
+                    </button>
+                    <button class="choice-btn" onclick="makeChoice(1, 'custom', 3, 100)">
+                        <strong>[C] Build Your Own Database</strong><br>
+                        How hard could it be? You'll make it perfect for your exact use case!
+                        <br><strong>Cost: 3 tokens | Burden: INSTANT DEATH</strong>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hall-of-shame">
+            <h2 style="margin-bottom: 15px;">📚 HALL OF SHAME: Real-World Examples</h2>
+            
+            <div class="example">
+                <strong>Etsy's Python Layer (2008-2012)</strong><br>
+                Hired Python devs, felt obligated to use Python. Built a pointless middle layer that took years to remove. Meanwhile, 90th percentile search latency was 2 minutes. Result: Several years without shipping anything.
+            </div>
+            
+            <div class="example">
+                <strong>Etsy's Activity Feeds (Success Story)</strong><br>
+                Built on boring stack: PHP, MySQL, Memcached. Scaled 20x over several years with ZERO specific attention. Worked because it was on a shared, well-understood platform.
+            </div>
+            
+            <div class="example">
+                <strong>Knight Capital (2012)</strong><br>
+                Deployed untested new trading software. Lost $440 million in 45 minutes. Company never recovered. Sometimes boring and tested > exciting and new.
+            </div>
+        </div>
+        
+        <button class="reset-btn" onclick="resetGame()">RESET SIMULATION</button>
+        
+        <footer>
+            Built with deliberately boring technology: Plain HTML, CSS, and JavaScript.<br>
+            No frameworks. No build process. No npm install.<br>
+            Source: Dan McKinley's "Choose Boring Technology" (2015)
+        </footer>
+    </div>
+    
+    <script>
+        let tokens = 3;
+        let burden = 0;
+        let currentScenario = 1;
+        
+        const scenarios = {
+            2: {
+                title: "SCENARIO 2: Caching Layer",
+                description: "Your app is slow. Database queries are killing you. Time to add caching.",
+                choices: [
+                    {
+                        label: "[A] Memcached",
+                        description: "Ancient. Boring. Does exactly one thing well. Everyone knows how it works.",
+                        cost: 0,
+                        burden: 8,
+                        consequence: "You add Memcached. It works. It's boring. 3 years later, it's still working. Nobody thinks about it."
+                    },
+                    {
+                        label: "[B] Redis",
+                        description: "More features! Pub/sub! Data structures! Everyone uses it now, pretty standard.",
+                        cost: 0,
+                        burden: 12,
+                        consequence: "Redis works great. You use 5% of its features. The other 95% add cognitive overhead, but it's manageable."
+                    },
+                    {
+                        label: "[C] Hazelcast",
+                        description: "Distributed! In-memory! The future! Only one person on your team has heard of it.",
+                        cost: 1,
+                        burden: 30,
+                        consequence: "Hazelcast works... until it doesn't. Debugging issues requires reading Java source code. Your team is writing Python. You spend weeks on caching issues."
+                    }
+                ]
+            },
+            3: {
+                title: "SCENARIO 3: Frontend Framework",
+                description: "You need to build an interactive web interface. The frontend team is arguing.",
+                choices: [
+                    {
+                        label: "[A] Vanilla JavaScript + jQuery",
+                        description: "Old school. Everyone hates it. But it works everywhere and never changes.",
+                        cost: 0,
+                        burden: 15,
+                        consequence: "Your frontend is verbose but simple. Any developer can understand it. No build step. No dependency hell. No framework migrations every 2 years."
+                    },
+                    {
+                        label: "[B] React",
+                        description: "Industry standard now. Huge ecosystem. Your team knows it. Battle-tested.",
+                        cost: 0,
+                        burden: 18,
+                        consequence: "React works fine. It's boring now (hard to believe, but true in 2025). Your team is productive. Hiring is easy."
+                    },
+                    {
+                        label: "[C] The Hot New Framework",
+                        description: "Just released! Solves all of React's problems! Amazing benchmarks! Only 200 GitHub stars.",
+                        cost: 1,
+                        burden: 35,
+                        consequence: "The framework is fast but docs are sparse. When you hit bugs, there's no Stack Overflow answers. You're pioneering. Is this what you wanted to spend time on?"
+                    }
+                ]
+            },
+            4: {
+                title: "SCENARIO 4: AI/ML Integration",
+                description: "Your product needs recommendations/predictions/personalization. The data science team wants to deploy models. How do you do it?",
+                choices: [
+                    {
+                        label: "[A] Simple Heuristics + SQL",
+                        description: "Rule-based system. Collaborative filtering with SQL queries. No models to retrain. PostgreSQL window functions can do a lot.",
+                        cost: 0,
+                        burden: 8,
+                        consequence: "Your 'AI' is just smart SQL. Users don't care - recommendations work well enough. You ship in 2 weeks. No GPU costs. No model drift. No MLOps team needed. Boring but profitable."
+                    },
+                    {
+                        label: "[B] Scikit-learn + Flask API",
+                        description: "Simple models (logistic regression, random forest). Retrain weekly via cron. Serve via REST API. Boring ML stack that's been around since 2010.",
+                        cost: 0,
+                        burden: 20,
+                        consequence: "Your models are simple but interpretable. Retraining takes 10 minutes on one machine. When predictions are wrong, you can debug why. The whole system fits in your head. It just works."
+                    },
+                    {
+                        label: "[C] LLM + Vector DB + RAG + Fine-tuning Pipeline",
+                        description: "GPT-4 API + Pinecone + LangChain + MLflow + Kubeflow! SOTA performance! You saw it on Twitter! Your competitors are doing it!",
+                        cost: 2,
+                        burden: 50,
+                        consequence: "Your API costs are $10k/month before you have revenue. Prompts mysteriously stop working after OpenAI updates. Vector DB goes down and you can't debug it. You hired 2 MLOps engineers. Your 'AI' feature took 6 months. A competitor launched with regex and acquired your customers."
+                    }
+                ]
+            }
+        };
+        
+        const consequences = {
+            'postgres': "PostgreSQL deployed. It's boring. It works. 5 years later, you've scaled to millions of users and haven't thought about switching databases once. ACID compliance saves you during that accounting bug.",
+            'mongo': "MongoDB is running. At first it's fine. Then you discover eventual consistency issues. Then you learn about replica set elections. Then a developer does an unindexed query and brings down production. You hire a MongoDB consultant. Was the JSON syntax worth it?",
+            'custom': "You spent 18 months building a database. Your competitor shipped product in 3 months using PostgreSQL and acquired your customers. Your investors are furious. Your database handles edge cases beautifully that will never occur because you have no users."
+        };
+        
+        function makeChoice(scenario, choiceId, tokenCost, burdenCost) {
+            // Check if game is already over
+            if (document.getElementById('game-over').classList.contains('show') || 
+                document.getElementById('victory').classList.contains('show')) {
+                return;
+            }
+            
+            // Apply costs
+            tokens -= tokenCost;
+            burden += burdenCost;
+            
+            // Update displays
+            document.getElementById('token-count').textContent = tokens;
+            document.getElementById('burden-fill').style.width = Math.min(burden, 100) + '%';
+            document.getElementById('burden-percentage').textContent = burden;
+            
+            // Update burden status
+            let status = 'MANAGEABLE';
+            if (burden > 30) status = 'CONCERNING';
+            if (burden > 60) status = 'CRITICAL';
+            if (burden >= 100) status = 'UNSUSTAINABLE';
+            document.getElementById('burden-status').textContent = status;
+            
+            // Show consequence
+            const consequenceEl = document.getElementById('consequence');
+            const consequenceText = document.getElementById('consequence-text');
+            
+            if (choiceId in consequences) {
+                consequenceText.textContent = consequences[choiceId];
+            } else {
+                consequenceText.textContent = scenarios[scenario].choices.find(c => c.label.includes(choiceId))?.consequence || "Choice recorded.";
+            }
+            
+            consequenceEl.classList.add('show');
+            
+            // Check for immediate game over
+            if (choiceId === 'custom' || burden >= 100) {
+                endGame(false, choiceId === 'custom' ? 
+                    "You spent all your time building infrastructure instead of product. Your startup ran out of runway." :
+                    "Your operational burden became unsustainable. The team spent all their time firefighting instead of shipping features. Investors pulled funding."
+                );
+                return;
+            }
+            
+            if (tokens < 0) {
+                endGame(false, "You burned through all your innovation tokens. Your team is overwhelmed learning new technologies. Nothing works together. You ship nothing.");
+                return;
+            }
+            
+            // Hide current scenario
+            document.getElementById(`scenario-${scenario}`).classList.add('hidden');
+            
+            // Show next scenario or end game
+            currentScenario++;
+            if (currentScenario <= 4) {
+                loadScenario(currentScenario);
+            } else {
+                // Game complete
+                if (tokens >= 0 && burden < 80) {
+                    endGame(true, `You shipped product! You used ${3 - tokens} innovation tokens wisely and kept operational burden at ${burden}%. Your team can focus on business problems, not infrastructure.`);
+                } else if (burden >= 80) {
+                    endGame(false, "You technically survived, but your operational burden is crushing. Your team spends 80% of time on infrastructure. Competitors are shipping faster.");
+                } else {
+                    endGame(true, `You survived, but barely. ${burden}% operational burden means you're always one incident away from disaster.`);
+                }
+            }
+        }
+        
+        function loadScenario(num) {
+            const scenario = scenarios[num];
+            const container = document.getElementById('scenarios');
+            
+            const scenarioEl = document.createElement('div');
+            scenarioEl.className = 'scenario';
+            scenarioEl.id = `scenario-${num}`;
+            
+            scenarioEl.innerHTML = `
+                <h2>${scenario.title}</h2>
+                <p>${scenario.description}</p>
+                <div class="choices">
+                    ${scenario.choices.map((choice, idx) => `
+                        <button class="choice-btn" onclick="makeChoice(${num}, '${String.fromCharCode(97 + idx)}', ${choice.cost}, ${choice.burden})">
+                            <strong>${choice.label}</strong><br>
+                            ${choice.description}
+                            <br><strong>Cost: ${choice.cost} token${choice.cost !== 1 ? 's' : ''} | Burden: +${choice.burden}%</strong>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.appendChild(scenarioEl);
+        }
+        
+        function endGame(victory, message) {
+            if (victory) {
+                document.getElementById('victory-message').textContent = message;
+                document.getElementById('victory').classList.add('show');
+            } else {
+                document.getElementById('failure-reason').textContent = message;
+                document.getElementById('game-over').classList.add('show');
+            }
+        }
+        
+        function resetGame() {
+            tokens = 3;
+            burden = 0;
+            currentScenario = 1;
+            
+            document.getElementById('token-count').textContent = tokens;
+            document.getElementById('burden-fill').style.width = '0%';
+            document.getElementById('burden-percentage').textContent = '0';
+            document.getElementById('burden-status').textContent = 'MANAGEABLE';
+            
+            document.getElementById('consequence').classList.remove('show');
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('victory').classList.remove('show');
+            
+            // Remove all scenarios except the first
+            const scenarios = document.getElementById('scenarios');
+            scenarios.innerHTML = `
+                <div class="scenario" id="scenario-1">
+                    <h2>SCENARIO 1: Database Selection</h2>
+                    <p>Your startup needs to store user data, transactions, and product information. The CTO is asking what database to use.</p>
+                    <div class="choices">
+                        <button class="choice-btn" onclick="makeChoice(1, 'postgres', 0, 10)">
+                            <strong>[A] PostgreSQL</strong><br>
+                            Boring choice. Battle-tested since 1996. Free. Everyone on the team knows SQL.
+                            <br><strong>Cost: 0 tokens | Burden: +10%</strong>
+                        </button>
+                        <button class="choice-btn" onclick="makeChoice(1, 'mongo', 1, 25)">
+                            <strong>[B] MongoDB</strong><br>
+                            The webinar said it's "web-scale"! JSON documents feel modern. None of you have used it before.
+                            <br><strong>Cost: 1 token | Burden: +25%</strong>
+                        </button>
+                        <button class="choice-btn" onclick="makeChoice(1, 'custom', 3, 100)">
+                            <strong>[C] Build Your Own Database</strong><br>
+                            How hard could it be? You'll make it perfect for your exact use case!
+                            <br><strong>Cost: 3 tokens | Burden: INSTANT DEATH</strong>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
